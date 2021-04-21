@@ -3,7 +3,7 @@ import skimage.io
 import matplotlib.pyplot as plt
 import maxflow
 
-path = 'C:/Users/mark_/Documents/DTU/Kandidat/1.semester/Advanced Image Analysis/Project/'
+path = 'C:/.../'
 slices = skimage.io.imread(path + 'nerves_part.tiff').astype(float)/(2**8-1)
 
 #%%
