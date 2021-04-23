@@ -123,3 +123,42 @@ def evolve_snake(snake, I, B, step_size):
     snake = distribute_points(snake)
     snake = keep_snake_inside(snake, I.shape)
     return snake
+
+def evolve_snake_II(snake, I, B, step_size):
+    """ Single step of snake evolution."""
+    normals = snake_normals(snake)
+    snake_ext = (snake+normals*2).astype(int)
+    snake_int = (snake-normals*2).astype(int)
+    m_int = np.mean(I[snake_int])
+    m_ext = np.mean(I[snake_ext])
+      
+    f = scipy.interpolate.RectBivariateSpline(np.arange(I.shape[0]), np.arange(I.shape[1]), I)
+    val = f(snake[0],snake[1], grid=False)
+    # val = I[snake[0].astype(int), snake[1].astype(int)] # simpler variant without interpolation
+    force = 0.5*(-m_int+m_ext)*step_size*(2*val - (m_int+m_ext))
+    snake += step_size*force*snake_normals(snake) # external part
+    snake = np.dot(snake, B) # internal part, ordering influenced by 2-by-N representation of snake
+    snake = remove_intersections(snake)
+    snake = distribute_points(snake)
+    snake = keep_snake_inside(snake, I.shape)
+    return snake
+
+def displace_snake_II(snake,image,step_size,B):  
+    
+    #mask = skimage.draw.polygon2mask(image.shape, snake.T)
+    normals = snake_normals(snake)
+    snake_out = (snake+normals*3).astype(int)
+    snake_int = (snake-normals*3).astype(int)
+    m_int = np.mean(image[snake_int])
+    m_ext = np.mean(image[snake_out])
+
+    f = scipy.interpolate.RectBivariateSpline(np.arange(image.shape[0]), np.arange(image.shape[1]), image)
+    val = f(snake[0],snake[1], grid=False)
+    # val = I[snake[0].astype(int), snake[1].astype(int)] # simpler variant without interpolation
+    force = 0.5*(m_ext-m_int)*step_size*(2*val - (m_int+m_ext))
+    snake += step_size*force*snake_normals(snake) # external part
+    snake = np.dot(snake, B) # internal part, ordering influenced by 2-by-N representation of snake
+    snake = remove_intersections(snake)
+    snake = distribute_points(snake)
+    snake = keep_snake_inside(snake, image.shape)
+    return snake
