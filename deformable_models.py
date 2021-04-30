@@ -1,4 +1,5 @@
 
+
 #Project
 import numpy as np
 import skimage.io
@@ -61,6 +62,9 @@ ax.plot(np.r_[snakes[2][1],snakes[2][1,0]],np.r_[snakes[2][0],snakes[2][0,0]],'b
 ax.set_title('Initialization')
 
 
+fig, ax = plt.subplots()
+ax.imshow(im, cmap=plt.cm.gray)
+ax.plot(np.r_[snake[1],snake[1,0]],np.r_[snake[0],snakes[0,0]],'r-')
 
 #%%
 ## Plot all
@@ -123,13 +127,13 @@ ax.imshow(im, cmap=plt.cm.gray)
 ax.plot(np.r_[snakes3D[0][1],snakes3D[0][1,0]],np.r_[snakes3D[0][0],snakes3D[0][0,0]],'r-')
 
 #%% After iters
-for i in range(2,100):
+for i in range(2,25):
     for j in range(nr_iter2):
         snakes = sis.evolve_snake(snakes, im_full[i,:,:], B, step_size)      
     snakes3D.append(snakes)
 
 #%%
-imgs = np.arange(1,100, 10) 
+imgs = np.arange(1,25, 1) 
 for j in imgs:
     fig, ax = plt.subplots()
     ax.imshow(im_full[j,:,:], cmap=plt.cm.gray)
@@ -160,13 +164,12 @@ B = sis.regularization_matrix(nr_points, alpha, beta)
 
 snakes = []
 snakes3D = []
+snakes_array = np.zeros(10)
 
-
-
-snakes4D = []
 for i in centers:
     snake = sis.make_circular_snake(nr_points, i, radius)
     snakes.append(snake)
+    
     
 fig, ax = plt.subplots()
 ax.imshow(im, cmap=plt.cm.gray)
@@ -178,15 +181,12 @@ ax.set_title('Initialization')
 
 
 #%% First iters
-snakes_final = []
 for j in range(nr_iter):
     for k in range(4):
         snakes[k] = sis.evolve_snake(snakes[k], im_full[0,:,:], B, step_size)
-
-snakes_final.append(snakes)
     
 snakes3D.append(snakes)  
-
+snakes_array[0] = snakes
 #%%
 fig, ax = plt.subplots()
 ax.imshow(im, cmap=plt.cm.gray)
@@ -197,12 +197,13 @@ ax.plot(np.r_[snakes3D[0][3][1],snakes3D[0][3][1,0]],np.r_[snakes3D[0][3][0],sna
 
 
 #%% After iters
+
 for i in range(2,10):
     for j in range(nr_iter2):
         for k in range(4):
             snakes[k] = sis.evolve_snake(snakes[k], im_full[i,:,:], B, step_size) 
     snakes3D.append(snakes)
-    
+    snakes_array[i] = snakes      
 
 
 #%% 2D plot of result
@@ -229,10 +230,84 @@ ax.plot(np.r_[snakes3D[0][2][1],snakes3D[0][2][1,0]],np.r_[snakes3D[0][2][0],sna
 ax.plot(np.r_[snakes3D[0][3][1],snakes3D[0][3][1,0]],np.r_[snakes3D[0][3][0],snakes3D[0][3][0,0]],'r-')
 
 #%%
-x = 1
+x = 5
 fig, ax = plt.subplots()
 ax.imshow(im_full[x,:,:], cmap=plt.cm.gray)
 ax.plot(np.r_[snakes3D[x][0][1],snakes3D[x][0][1,0]],np.r_[snakes3D[x][0][0],snakes3D[x][0][0,0]],'r-')
 ax.plot(np.r_[snakes3D[x][1][1],snakes3D[x][1][1,0]],np.r_[snakes3D[x][1][0],snakes3D[x][1][0,0]],'r-')
 ax.plot(np.r_[snakes3D[x][2][1],snakes3D[x][2][1,0]],np.r_[snakes3D[x][2][0],snakes3D[x][2][0,0]],'r-')
 ax.plot(np.r_[snakes3D[x][3][1],snakes3D[x][3][1,0]],np.r_[snakes3D[x][3][0],snakes3D[x][3][0,0]],'r-')
+
+
+
+#%% Try with different for each snake
+nr_points = 100
+step_size = 4
+alpha = 4
+beta = 3.2
+nr_iter = 40
+nr_iter2 = 3
+
+B = sis.regularization_matrix(nr_points, alpha, beta)
+
+snakes3D_1 = []
+snakes3D_2 = []
+snakes3D_3 = []
+snakes3D_4 = []
+
+snakes_1 = sis.make_circular_snake(nr_points, centers[0], radius)
+snakes_2 = sis.make_circular_snake(nr_points, centers[1], radius)
+snakes_3 = sis.make_circular_snake(nr_points, centers[2], radius)
+snakes_4 = sis.make_circular_snake(nr_points, centers[3], radius)
+    
+fig, ax = plt.subplots()
+ax.imshow(im, cmap=plt.cm.gray)
+ax.plot(np.r_[snakes_1[1],snakes_1[1,0]],np.r_[snakes_1[0],snakes_1[0,0]],'r-')
+ax.plot(np.r_[snakes_2[1],snakes_2[1,0]],np.r_[snakes_2[0],snakes_2[0,0]],'g-')
+ax.plot(np.r_[snakes_3[1],snakes_3[1,0]],np.r_[snakes_3[0],snakes_3[0,0]],'b-')
+ax.plot(np.r_[snakes_4[1],snakes_4[1,0]],np.r_[snakes_4[0],snakes_4[0,0]],'y-')
+ax.set_title('Initialization')
+
+#%% First iteration (slice 0)
+for j in range(nr_iter):
+    snakes_1 = sis.evolve_snake(snakes_1, im_full[0,:,:], B, step_size)
+    snakes_2 = sis.evolve_snake(snakes_2, im_full[0,:,:], B, step_size) 
+    snakes_3 = sis.evolve_snake(snakes_3, im_full[0,:,:], B, step_size) 
+    snakes_4 = sis.evolve_snake(snakes_4, im_full[0,:,:], B, step_size) 
+
+snakes3D_1.append(snakes_1)
+snakes3D_2.append(snakes_2)  
+snakes3D_3.append(snakes_3)  
+snakes3D_4.append(snakes_4)  
+
+fig, ax = plt.subplots()
+ax.imshow(im, cmap=plt.cm.gray)
+ax.plot(np.r_[snakes3D_1[0][1],snakes3D_1[0][1,0]],np.r_[snakes3D_1[0][0],snakes3D_1[0][0,0]],'r-')
+ax.plot(np.r_[snakes3D_2[0][1],snakes3D_2[0][1,0]],np.r_[snakes3D_2[0][0],snakes3D_2[0][0,0]],'g-')
+ax.plot(np.r_[snakes3D_3[0][1],snakes3D_3[0][1,0]],np.r_[snakes3D_3[0][0],snakes3D_3[0][0,0]],'b-')
+ax.plot(np.r_[snakes3D_4[0][1],snakes3D_4[0][1,0]],np.r_[snakes3D_4[0][0],snakes3D_4[0][0,0]],'y-')
+
+#%% Following iterations (slice 0 +  for n in 1,2,...,1024)
+for i in range(2,1024):
+    for j in range(nr_iter2):
+        snakes_1 = sis.evolve_snake(snakes_1, im_full[i,:,:], B, step_size)
+        snakes_2 = sis.evolve_snake(snakes_2, im_full[i,:,:], B, step_size)
+        snakes_3 = sis.evolve_snake(snakes_3, im_full[i,:,:], B, step_size)
+        #snakes_4 = sis.evolve_snake(snakes_4, im_full[i,:,:], B, step_size)
+        
+            
+    snakes3D_1.append(snakes_1)
+    snakes3D_2.append(snakes_2)
+    snakes3D_3.append(snakes_3)
+    #snakes3D_4.append(snakes_4)
+
+#%%
+imgs = np.arange(960,980,1) 
+for j in imgs:
+    fig, ax = plt.subplots()
+    ax.imshow(im_full[j,:,:], cmap=plt.cm.gray)
+    ax.plot(np.r_[snakes3D_1[j][1],snakes3D_1[j][1,0]],np.r_[snakes3D_1[j][0],snakes3D_1[j][0,0]],'r-')
+    ax.plot(np.r_[snakes3D_2[j][1],snakes3D_2[j][1,0]],np.r_[snakes3D_2[j][0],snakes3D_2[j][0,0]],'g-')
+    ax.plot(np.r_[snakes3D_3[j][1],snakes3D_3[j][1,0]],np.r_[snakes3D_3[j][0],snakes3D_3[j][0,0]],'b-')
+    #ax.plot(np.r_[snakes3D_4[j][1],snakes3D_4[j][1,0]],np.r_[snakes3D_4[j][0],snakes3D_4[j][0,0]],'y-')
+
