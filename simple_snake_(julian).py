@@ -111,17 +111,27 @@ def evolve_snake(snake, I, B, step_size):
     mask = skimage.draw.polygon2mask(I.shape, snake.T)
     normals = snake_normals(snake)
     
+    # if mask.size == 0:
+    #     snake_ext = (snake+normals*2).astype(int)
+    #     snake_int = (snake-normals*2).astype(int)
+    #     m_in = np.mean(I[snake_int])
+    #     m_out = np.mean(I[snake_ext])
+    # else:
+    #     m_in = np.min(I[mask])
+    #     m_out = np.max(I[mask])
+    
     m_in = np.min(I[mask])
     m_out = np.max(I[mask])
+    
     
     # snake_ext = (snake+normals*2).astype(int)
     # snake_int = (snake-normals*2).astype(int)
     # m_in = np.mean(I[snake_int])
     # m_out = np.mean(I[snake_ext])
     
-    #mask_sort = np.sort(np.ravel(I[0:10, 0:10]))
-    #m_in = np.mean(mask_sort[:10])
-    #m_out = np.mean(mask_sort[-10:])
+    # mask_sort = np.sort(np.ravel(I[0:10, 0:10]))
+    # m_out = np.mean(mask_sort[:10])
+    # m_in = np.mean(mask_sort[-10:])
 
     # m_out = np.min(I[mask])
     # m_in = np.max(I[mask])
@@ -156,22 +166,23 @@ def evolve_snake(snake, I, B, step_size):
 def evolve_snake2(snake, I, B, step_size):
     """ Single step of snake evolution."""
     mask = skimage.draw.polygon2mask(I.shape, snake.T)
-    m_in = np.mean(I[mask])
-    m_out = np.mean(I[~mask])
-      
+    normals = snake_normals(snake)
+    
+    m_in = np.min(I[~mask])
+    m_out = np.max(I[~mask])
+    
     f = scipy.interpolate.RectBivariateSpline(np.arange(I.shape[0]), np.arange(I.shape[1]), I)
     val = f(snake[0],snake[1], grid=False)
     # val = I[snake[0].astype(int), snake[1].astype(int)] # simpler variant without interpolation
     force = 0.5*(m_in-m_out)*step_size*(2*val - (m_in+m_out))
-    N = snake_normals(snake)
-    direct = step_size*force*N
-    snake += direct # external part
+    #force = 0.5*(-m_in+m_out)*step_size*(2*val - (m_in+m_out))
+    snake += step_size*force*snake_normals(snake) # external part
     snake = np.dot(snake, B) # internal part, ordering influenced by 2-by-N representation of snake
     snake = remove_intersections(snake)
     snake = distribute_points(snake)
     snake = keep_snake_inside(snake, I.shape)
-    
-    return snake, N, direct
+    return snake
+
 
 
 def evolve_snake_II(snake, I, B, step_size):
@@ -212,3 +223,6 @@ def displace_snake_II(snake,image,step_size,B):
     snake = distribute_points(snake)
     snake = keep_snake_inside(snake, image.shape)
     return snake
+
+
+
